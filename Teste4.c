@@ -2,121 +2,133 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
-
-#define ARRAY_SIZE(a) sizeof(a)/sizeof(a[0])
-
-/**Tamanho do alfabeto (# de símbolos)*/
-
-#define ALPHABET_SIZE (26)
-
-/**Converte a chave atual para caractere dentro de um index*/
-/**Usar somente 'a' até 'z' em minúsculo*/
-
-#define CHAR_TO_INDEX(c) ((int)c - (int) 'a')
-
-/**Árvore trie*/
-
-struct TrieNode{
-/**O tamanho do alfabeto é multiplicado por dois pois armazena de 'A' a 'Z' e de 'a' a 'z'*/
-    struct TrieNode *children[ALPHABET_SIZE*2];
-
-    /**a variável isEndOfWord é verdadeira se o nó representa o final de uma palavra*/
-    bool isEndOfWord;
 
 
-};
+struct dict{
+struct dict *left, *right;
+char palavra[10], meaning[20];
+}*Root=NULL;
 
+typedef struct dict dictionary;
 
-struct TrieNode *getNode(void){
+int check(char[], char[]);
+void insert(dictionary *);
+void Search();
+void view(dictionary *);
 
+int check(char a[], char b[]){
+int i, j, c;
+for(i=0,j=0; a[i]!='\0' && b[j]!='\0'; i++, j++){
+    if(a[i]>b[j]){
+        c=1;
+        break;
+    }
+    else if(b[j]>a[i]){
+        c=-1;
+        break;
+    }
 
-struct TrieNode *pNode = NULL;
+    else
 
-if(pNode){
+    c=0;
 
-    int i;
-
-    pNode -> isEndOfWord = false;
-
-    for (i = 0; i < ALPHABET_SIZE; i++)
-        pNode -> children[i] = NULL;
 }
-
-return pNode;
+    if(c==1)
+        return 1;
+    else if(c==-1)
+        return -1;
+    else
+        return 0;
 
 }
 
-
-/**Se a chave não existir na árvore, a chave será inserida nela*/
-/**Se a chave é um prefixo de um nó da árvore trie, só marque o nó da folha da árvore*/
-
-void insert(struct TrieNode *root, const char *key){
-
-int level;
-int length = strlen(key);
-int index;
-
-struct TrieNode *pCrawl = root;
+void Search(){
+int flag=0;
+dictionary *ptr;
+char w[10];
+ptr=Root;
 
 
-int Length = sizeof(key) / sizeof(char); // Sempre me retorna o valor 4, deveria me retornar o valor o 6
+printf("\nEnter the word...");
 
-    printf("Length: %i\n", Length);
-/*
-    for (int i = 0; i < Length; i++)
-        printf("%i - %s\n", i + 1, menuOpc[i]);
-*/
-for (level = 0; level < Length; level ++){
-    index = CHAR_TO_INDEX(key[level]);
-        if(!pCrawl -> children[index])
-            pCrawl -> children[index] = getNode();
-        pCrawl = pCrawl -> children[index];
+scanf("%s", w);
+while(ptr!=NULL && flag ==0){
+    if(check(w, ptr -> palavra ) > 0){
+        ptr =ptr -> right;
+    }
+    else if(check(w, ptr -> palavra) < 0){
+        ptr = ptr -> left;
+    }
+    else if (check(w,ptr -> palavra) ==0){
+        flag=1;
+        printf("\nMeaning:" "%s", ptr -> meaning);
+    }
+}
+
+if(flag==0)
+    printf("\nWord not found!");
+}
+
+void insert(dictionary *temp){
+int flag=0;
+dictionary *ptr, *par;
+ptr=Root;
+
+if(Root == NULL)
+    Root = temp;
+else{
+    while(ptr!=NULL){
+        if(check(temp -> palavra, ptr -> palavra ) > 0){
+            par = ptr;
+            ptr = ptr -> right;
+    }
+
+    else if(check(temp -> palavra, ptr -> palavra) < 0){
+        par = ptr;
+        ptr = ptr -> left;
+    }
+
+    else if (check(temp -> palavra, ptr -> palavra) == 0){
+        flag=1;
+        printf("\nWord exists!!\n" );
+        break;
+    }
+}
+if(flag == 0 && ptr ==NULL){
+    if(check(par -> palavra, temp -> palavra) ==1)
+        par -> left=temp;
+    else if(check(par -> palavra, temp -> palavra)==-1)
+        par -> right=temp;
+}
+}
+
+}
+
+void view(dictionary *ptr){
+    if(Root ==NULL)
+        printf("\nEmpty Dictionary\n");
+
+        else if(ptr !=NULL){
+                view(ptr-> left);
+                printf("\nWord: %s\n", ptr -> palavra);
+                printf("\nMeaning: %s\n", ptr -> meaning);
+                view(ptr -> right);
+    }
 }
 
 
-/*
-for (level = 0; level < length; level ++){
-    index = CHAR_TO_INDEX(key[level]);
-        if(!pCrawl -> children[index])
-            pCrawl -> children[index] = getNode();
-        pCrawl = pCrawl -> children[index];
-}
-*/
-/**Marcar o último nó da palavra como uma folha na árvore*/
-pCrawl -> isEndOfWord = true;
-
-}
-
-/**Retorna verdadeiro se a chave estiver presente na árvore, se não retorna falso*/
-
-bool search(struct TrieNode *root, const char *key){
-
-int level;
-int length = strlen(key);
-int index;
-struct TrieNode *pCrawl = root;
-
-for (level = 0; level < length; level ++){
-    index = CHAR_TO_INDEX(key[level]);
-    if(!pCrawl -> children[index])
-    return false;
-
-    pCrawl = pCrawl -> children[index];
-}
-
-return (pCrawl != NULL && pCrawl -> isEndOfWord);
-
-}
 
 
 int main(int argc, char *argv[])
 {
-
+    int opcao;
+    dictionary *temp;
 char palavra[10];
+
 
     FILE *fp;
     FILE *fp2;
+    FILE *fp3;
     char ch;
     int size = 0;
     fp = fopen("data.txt", "r");
@@ -127,13 +139,11 @@ char palavra[10];
         printf("\nFile unable to open ");
     else
         printf("\nFile opened ");
-    fseek(fp, 0, 2);    /** file pointer at the end of file */
-    size = ftell(fp);   /** take a position of file pointer un size variable */
+    fseek(fp, 0, 2);    /* file pointer at the end of file */
+    size = ftell(fp);   /* take a position of file pointer un size variable */
     //char *myArray =  (char*)malloc(size * sizeof *myArray);
-
-
     char *myArray = (char*)malloc(size);
-    char *palavras_separadas = (char*)malloc(size);
+
 
     static const char filename[] = "data.txt";
     FILE *file = fopen(filename, "r");
@@ -151,44 +161,55 @@ char palavra[10];
                 //putchar(ch);
                 myArray[index++] = ch;
                 index2++;
-
-
             }
         }
-
-
         printf("%s", myArray);
-        struct TrieNode *root = getNode();
-        insert(root, myArray);
-        insert(root, &myArray[2]);
-
-/*for(int z = 0; z<strlen(index2); z++){
-        insert(root, myArray[z]);
-
-}*/
-       // insert(root, myArray[index]);
- /*struct TrieNode *root = getNode();
-                insert(root, &myArray);*/
-
         fprintf(fp2, "%s", myArray);
 
-/*for(int z=0; z<contador; z++){
-    printf("%s", palavras_separadas[z]);
-}*/
+        temp=(dictionary *)malloc(sizeof(dictionary));
+        temp -> left = NULL;
+        temp -> right = NULL;
+
+        //strcpy(myArray, temp ->palavra);
+
+        //printf("\nInsert meaning:");
+        //scanf(&myArray[0], temp -> palavra);
+        //insert(temp);
+        strcpy(&myArray, temp -> meaning);
+        scanf("%s", temp -> palavra);
+        insert(temp);
+        strcpy(&myArray, temp -> meaning);
+        insert(temp);
+
+
+        while (opcao!=4){
+    printf("\n1.Search\n2.Insert\n3.View\n4.Quit\nYour choice please...");
+    scanf("%d", &opcao);
+    switch(opcao){
+    case 1: Search(); break;
+    case 2:
+        temp=(dictionary *)malloc(sizeof(dictionary));
+        temp -> left =NULL;
+        temp -> right = NULL;
+        printf("\nInsert Word:\n");
+        scanf("%s", temp -> palavra);
+        printf("\nInsert meaning:");
+        scanf("%s", temp -> meaning);
+        insert(temp);
+        break;
+    case 3:
+        view(Root);
+        break;
+    case 4: exit(0);
+    }
+}
         fclose(file);
         fclose(fp2);
-/*
+
         int i;
         for(i = 0;i < sizeof(myArray);i++){
             putchar(myArray[i]);
-        }/*
-/*
-for(i = 0; i<strlen(myArray); i++){
-    printf("%s", myArray[i]);
-}
-*/
-
-
+        }
 
 free(myArray);
         //qsort (array, 2, sizeof (const char *), compare);
@@ -196,55 +217,5 @@ free(myArray);
         //    printf ("%d: %s.\n", i, array[i]);
         //}
     }
-
 }
 
-/** Deallocates memory previously allocated for the TrieNode. */
-void trieFree(struct TrieNode* root) {
-
-    if(root){
-
-        for(int i = 0; i <=26; i ++)
-        {
-            trieFree(root->children[i]);
-        }
-        free(root);
-
-    }
-
-}
-
-
-
-
-
-
-
-/** Returns if there is any word in the trie
-    that starts with the given prefix. */
-bool startsWith(struct TrieNode* root, char* prefix) {
-
-    struct TrieNode * pCrawl = root;
-
-    int i =0, index=0;
-    bool flag = false;
-    if(root){
-    while(prefix[i] != '\0')
-    {
-         index = ((int) (prefix[i]) - (int)'a');
-
-     if(pCrawl->children[index] == NULL){
-     flag = false;
-         return flag;
-     }
-     else
-     flag = true;
-
-     pCrawl = pCrawl->children[index];
-     i++;
-    }
-
-    }
-
-    return flag;
-}
