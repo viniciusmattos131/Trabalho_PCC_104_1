@@ -59,13 +59,30 @@ int index;
 
 struct TrieNode *pCrawl = root;
 
-for (level = 0; level < length; level ++){
+
+int Length = sizeof(key) / sizeof(char); // Sempre me retorna o valor 4, deveria me retornar o valor o 6
+
+    printf("Length: %i\n", Length);
+/*
+    for (int i = 0; i < Length; i++)
+        printf("%i - %s\n", i + 1, menuOpc[i]);
+*/
+for (level = 0; level < Length; level ++){
     index = CHAR_TO_INDEX(key[level]);
         if(!pCrawl -> children[index])
             pCrawl -> children[index] = getNode();
         pCrawl = pCrawl -> children[index];
 }
 
+
+/*
+for (level = 0; level < length; level ++){
+    index = CHAR_TO_INDEX(key[level]);
+        if(!pCrawl -> children[index])
+            pCrawl -> children[index] = getNode();
+        pCrawl = pCrawl -> children[index];
+}
+*/
 /**Marcar o último nó da palavra como uma folha na árvore*/
 pCrawl -> isEndOfWord = true;
 
@@ -160,11 +177,11 @@ char palavra[10];
 }*/
         fclose(file);
         fclose(fp2);
-
+/*
         int i;
         for(i = 0;i < sizeof(myArray);i++){
             putchar(myArray[i]);
-        }
+        }/*
 /*
 for(i = 0; i<strlen(myArray); i++){
     printf("%s", myArray[i]);
