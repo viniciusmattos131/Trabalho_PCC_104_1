@@ -51,7 +51,7 @@ return pNode;
 /**Se a chave não existir na árvore, a chave será inserida nela*/
 /**Se a chave é um prefixo de um nó da árvore trie, só marque o nó da folha da árvore*/
 
-void insert(struct TrieNode *root, const char *key[]){
+void insert(struct TrieNode *root, const char *key){
 
 int level;
 int length = strlen(key);
@@ -141,6 +141,9 @@ char palavra[10];
 
 
         printf("%s", myArray);
+        struct TrieNode *root = getNode();
+        insert(root, myArray);
+        insert(root, &myArray[2]);
 
 /*for(int z = 0; z<strlen(index2); z++){
         insert(root, myArray[z]);
@@ -159,14 +162,14 @@ char palavra[10];
         fclose(fp2);
 
         int i;
-        /*for(i = 0;i < sizeof(myArray);i++){
+        for(i = 0;i < sizeof(myArray);i++){
             putchar(myArray[i]);
-        }*/
-
+        }
+/*
 for(i = 0; i<strlen(myArray); i++){
     printf("%s", myArray[i]);
 }
-
+*/
 
 
 
